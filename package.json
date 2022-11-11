@@ -1,0 +1,16 @@
+{
+  "name": "readmeroast",
+  "version": "0.1.0",
+  "description": "Score any GitHub README out of 100 and get roasted for what it's missing",
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}
