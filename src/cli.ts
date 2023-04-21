@@ -1,7 +1,26 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { scoreReadme, type ScoreResult } from "./score.js";
+
+const README_NAMES = ["README.md", "readme.md", "Readme.md", "README.MD", "README.markdown", "README.txt", "README"];
+
+interface Target {
+  file: string;
+  label: string;
+}
+
+// Accept a README path, a directory holding one, or nothing at all for the cwd.
+function resolveTarget(path: string): Target {
+  const p = resolve(path);
+  if (!existsSync(p)) throw new Error(`no such file or directory: ${path}`);
+  if (!statSync(p).isDirectory()) {
+    return { file: p, label: p.replace(process.cwd() + "/", "") };
+  }
+  const found = README_NAMES.map((n) => join(p, n)).find(existsSync);
+  if (!found) throw new Error(`no README found in ${path}`);
+  return { file: found, label: found.replace(process.cwd() + "/", "") };
+}
 
 function print(result: ScoreResult, label: string) {
   const w = Math.max(...result.checks.map((c) => c.label.length));
@@ -15,19 +34,11 @@ function print(result: ScoreResult, label: string) {
   if (result.findings.length) {
     console.log("");
     for (const f of result.findings) console.log(`- ${f.roast}`);
-    console.log(`\nFix all of it and you're at 100/100.`);
+    if (result.score < 100) console.log(`\nFix all of it and you're at 100/100.`);
   }
 }
 
 function main() {
-  const file = resolve(process.argv.slice(2).find((a) => !a.startsWith("-")) ?? "README.md");
-  if (!existsSync(file)) throw new Error(`no such file: ${file}`);
-  print(scoreReadme(readFileSync(file, "utf8")), file.replace(process.cwd() + "/", ""));
-}
-
-try {
-  main();
-} catch (e) {
-  console.error((e as Error).message);
-  process.exit(1);
-}
+  const target = process.argv.slice(2).find((a) => !a.startsWith("-"));
+  const { file, label } = resolveTarget(target ?? ".");
+  print(scoreReadme(readFileSync(file, "utf8")), label);
