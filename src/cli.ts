@@ -42,3 +42,11 @@ function main() {
   const target = process.argv.slice(2).find((a) => !a.startsWith("-"));
   const { file, label } = resolveTarget(target ?? ".");
   print(scoreReadme(readFileSync(file, "utf8")), label);
+}
+
+try {
+  main();
+} catch (e) {
+  console.error((e as Error).message);
+  process.exit(1);
+}
