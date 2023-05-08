@@ -13,10 +13,12 @@ npm run build
 
 ```bash
 node dist/cli.js path/to/README.md
+node dist/cli.js .
 ```
 
-It prints a score out of 100 and the components that made it up, worst
-offenders first as one-line notes.
+Point it at a file or a directory holding a README. It prints a score out
+of 100 and the components that made it up, worst offenders first as
+one-line notes.
 
 ## Checks
 
