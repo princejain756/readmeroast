@@ -18,6 +18,16 @@ export interface ScoreResult {
   findings: Finding[];
 }
 
+const SLOP_WORDS = [
+  "delve", "seamless", "leverage", "elevate", "passionate",
+  "cutting-edge", "cutting edge", "game-chang", "unlock",
+  "supercharge", "revolutioniz",
+];
+
+function stripComments(md: string): string {
+  return md.replace(/<!--[\s\S]*?-->/g, "");
+}
+
 function fencedBlocks(md: string): Array<{ lang: string; body: string }> {
   const blocks: Array<{ lang: string; body: string }> = [];
   const re = /^```([^\s`]*)\n([\s\S]*?)^```/gm;
@@ -51,6 +61,9 @@ function firstParagraphOffset(md: string): number {
       t.startsWith("!") ||
       t.startsWith("[") ||
       t.startsWith("<") ||
+      t.startsWith("|") ||
+      /^[-*+•>]\s/.test(t) ||
+      /^\d+[.)]\s/.test(t) ||
       inFence;
     if (!skip && t.replace(/\[(.*?)\]\(.*?\)/g, "$1").trim().length >= 40) return pos;
     pos += line.length + 1;
@@ -58,19 +71,30 @@ function firstParagraphOffset(md: string): number {
   return -1;
 }
 
+function countEmojiHeadings(md: string): number {
+  return md
+    .split("\n")
+    .filter((l) => /^#{1,6}\s/.test(l) && /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(l))
+    .length;
+}
+
 function verdictFor(score: number): string {
   if (score >= 90) return "Star-worthy. Frame it.";
   if (score >= 75) return "Solid. A few fixes from great.";
   if (score >= 50) return "Bounce risk. People are leaving.";
-  return "Rough. This README is costing you stars.";
+  if (score >= 25) return "Rough. This README is costing you stars.";
+  return "Brutal. This README scares people off.";
 }
 
 export function scoreReadme(md: string): ScoreResult {
+  md = stripComments(md);
   const checks: CheckResult[] = [];
   const findings: Finding[] = [];
   const heads = headings(md);
   const blocks = fencedBlocks(md);
-  const words = md.split(/\s+/).filter(Boolean).length;
+  // Prose = markdown with fenced code removed; quoted output shouldn't count as tells.
+  const prose = md.replace(/```[\s\S]*?```/g, " ");
+  const words = prose.split(/\s+/).filter(Boolean).length;
 
   const add = (id: string, label: string, points: number, max: number, fix = "", roast = "") => {
     checks.push({ id, label, points: Math.max(0, Math.min(points, max)), max });
@@ -81,60 +105,45 @@ export function scoreReadme(md: string): ScoreResult {
   const pitchPos = firstParagraphOffset(md);
   if (pitchPos >= 0 && pitchPos <= 400) {
     add("pitch", "Pitch in the first lines", 15, 15);
+  } else if (pitchPos > 0) {
+    add("pitch", "Pitch in the first lines", 6, 15,
+      "Say what the project does in one plain sentence before anything else.",
+      "Your pitch is buried. Visitors decide in 5 seconds, and you're spending them on badges.");
   } else {
     add("pitch", "Pitch in the first lines", 0, 15,
       "Add one plain sentence under the title saying what this does and who it's for.",
-      "No pitch. People land on your repo and learn nothing about it.");
+      "No pitch at all. People land on your repo and learn nothing.");
   }
 
   // 2. Install instructions (15)
-  const installHead = headingMatch(heads, /install|getting started|quickstart|setup/);
-  const installCmd = /\b(npm i|npm install|pnpm|yarn add|pip install|brew install|cargo install|go install|npx)\b/i.test(md);
+  const installHead = headingMatch(heads, /install|getting started|quickstart|setup|set up/);
+  const installCmd = /\b(npm i|npm install|pnpm|yarn add|bun add|pip install|pipx|brew install|cargo (add|install)|go install|go get|npx|uvx|apt install|docker pull|composer require|gem install)\b/i.test(md);
   if (installHead && installCmd) add("install", "Install instructions", 15, 15);
+  else if (installHead || installCmd) add("install", "Install instructions", 9, 15,
+    "Pair the install section with the exact command, or name the section so people find it.",
+    "Half an install. People have to guess the rest, and guessing kills stars.");
   else add("install", "Install instructions", 0, 15,
     "Add an Install section with the copy-paste command.",
     "No install instructions. How do you expect anyone to use this, osmosis?");
 
   // 3. Usage example (15)
-  const usageHead = headingMatch(heads, /usage|example|how to/);
+  const usageHead = headingMatch(heads, /usage|example|quick ?start|how to|getting started/);
   if (usageHead && blocks.length) add("usage", "Usage example", 15, 15);
-  else if (usageHead || blocks.length) add("usage", "Usage example", 6, 15,
+  else if (usageHead || blocks.length) add("usage", "Usage example", 9, 15,
     "Show one real usage example, ideally a runnable command or code block.",
-    "Half a usage story. Show the thing working.");
+    "You've got half a usage story. Show the thing working.");
   else add("usage", "Usage example", 0, 15,
     "Add a Usage section with one code block showing the most common case.",
     "No usage example. Visitors shouldn't have to read source to figure out step one.");
 
-  // 4. Screenshot or demo (10)
-  if (/!\[[^\]]*\]\(|<img[\s>]|\.gif\b/i.test(md)) {
-    add("demo", "Screenshot or demo", 10, 10);
+  // 4. Language tags on code blocks (8)
+  if (!blocks.length) {
+    add("langtags", "Code blocks have language tags", 8, 8);
   } else {
-    add("demo", "Screenshot or demo", 0, 10,
-      "Add one screenshot or GIF showing real output near the top.",
-      "Zero visuals. A wall of text won't convert anyone scrolling at speed.");
+    const tagged = blocks.filter((b) => b.lang).length;
+    const frac = tagged / blocks.length;
+    const pts = frac >= 0.8 ? 8 : frac >= 0.5 ? 5 : 2;
+    add("langtags", "Code blocks have language tags", pts, 8,
+      `${blocks.length - tagged} of ${blocks.length} code blocks have no language tag. Add one (bash, ts, py) for syntax highlighting.`,
+      "Bare ``` blocks mean gray walls of text. One word after the fence fixes it.");
   }
-
-  // 5. License (8)
-  if (headingMatch(heads, /licen[cs]e/) || /licen[cs]e\.(md|txt)|mit licen[cs]e|apache-2\.0/i.test(md)) {
-    add("license", "License mentioned", 8, 8);
-  } else {
-    add("license", "License mentioned", 0, 8,
-      "Name the license in the README and add a LICENSE file.",
-      "No license means nobody can legally use your code. That's a feature you forgot.");
-  }
-
-  // 6. Length band (6)
-  if (words < 50) add("length", "Length (tweet vs novel)", 1, 6,
-    "The README is barely there. Pitch, install, usage at minimum.",
-    "This isn't a README, it's a post-it note.");
-  else if (words < 150) add("length", "Length (tweet vs novel)", 4, 6,
-    "Thin. A usage example and a features list would help.",
-    "A bit thin. People judge repos by README weight, fair or not.");
-  else if (words > 6000) add("length", "Length (tweet vs novel)", 3, 6,
-    `${words} words is a novel. Move details to docs/ and keep the README to the essentials.`,
-    `${words} words. Nobody reads this. Split it into docs and keep the front door clean.`);
-  else add("length", "Length (tweet vs novel)", 6, 6);
-
-  const score = checks.reduce((a, c) => a + c.points, 0);
-  return { score, verdict: verdictFor(score), checks, findings };
-}
