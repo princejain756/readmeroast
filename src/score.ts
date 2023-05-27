@@ -147,3 +147,23 @@ export function scoreReadme(md: string): ScoreResult {
       `${blocks.length - tagged} of ${blocks.length} code blocks have no language tag. Add one (bash, ts, py) for syntax highlighting.`,
       "Bare ``` blocks mean gray walls of text. One word after the fence fixes it.");
   }
+
+  // 5. Screenshot or demo (10)
+  const hasImage = /!\[[^\]]*\]\(|<img[\s>]|\.gif\b/i.test(md);
+  const hasDemoLink = /(demo|live|try it|asciinema|youtu|loom\.com)/i.test(md);
+  if (hasImage) add("demo", "Screenshot or demo", 10, 10);
+  else if (hasDemoLink) add("demo", "Screenshot or demo", 4, 10,
+    "Embed the demo as an image or GIF in the README itself, don't just link out.",
+    "A link to a demo is where screenshots go to die. Put the GIF in the README.");
+  else add("demo", "Screenshot or demo", 0, 10,
+    "Add one screenshot or GIF showing real output near the top.",
+    "Zero visuals. A wall of text won't convert anyone scrolling at speed.");
+
+  // 6. License (8)
+  if (headingMatch(heads, /licen[cs]e/) || /licen[cs]e\.(md|txt)|mit licen[cs]e|apache-2\.0|license.*badge/i.test(md)) {
+    add("license", "License mentioned", 8, 8);
+  } else {
+    add("license", "License mentioned", 0, 8,
+      "Name the license in the README and add a LICENSE file.",
+      "No license means nobody can legally use your code. That's a feature you forgot.");
+  }
