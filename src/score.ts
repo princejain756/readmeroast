@@ -167,3 +167,15 @@ export function scoreReadme(md: string): ScoreResult {
       "Name the license in the README and add a LICENSE file.",
       "No license means nobody can legally use your code. That's a feature you forgot.");
   }
+
+  // 7. Length band (6)
+  if (words < 50) add("length", "Length (tweet vs novel)", 1, 6,
+    "The README is barely there. Pitch, install, usage at minimum.",
+    "This isn't a README, it's a post-it note.");
+  else if (words < 150) add("length", "Length (tweet vs novel)", 4, 6,
+    "Thin. A usage example and a features list would help.",
+    "A bit thin. People judge repos by README weight, fair or not.");
+  else if (words > 6000) add("length", "Length (tweet vs novel)", 3, 6,
+    `${words} words is a novel. Move details to docs/ and keep the README to the essentials.`,
+    `${words} words. Nobody reads this. Split it into docs and keep the front door clean.`);
+  else add("length", "Length (tweet vs novel)", 6, 6);
