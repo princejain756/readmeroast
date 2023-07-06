@@ -179,3 +179,22 @@ export function scoreReadme(md: string): ScoreResult {
     `${words} words is a novel. Move details to docs/ and keep the README to the essentials.`,
     `${words} words. Nobody reads this. Split it into docs and keep the front door clean.`);
   else add("length", "Length (tweet vs novel)", 6, 6);
+
+  // 8. AI-slop tells (10)
+  const emDashes = (prose.match(/—/g) || []).length + (prose.match(/ -- /g) || []).length;
+  const lower = prose.toLowerCase();
+  const slopHits = SLOP_WORDS.filter((w) => lower.includes(w));
+  const emojiHeads = countEmojiHeadings(prose);
+  let slopPenalty = 0;
+  if (emDashes >= 3) slopPenalty += Math.min(6, 2 + Math.floor(emDashes / 3));
+  slopPenalty += Math.min(6, slopHits.length * 3);
+  if (emojiHeads >= 3) slopPenalty += 2;
+  slopPenalty = Math.min(10, slopPenalty);
+  const tells = [
+    emDashes >= 3 ? `${emDashes} em dashes` : "",
+    slopHits.length ? `"${slopHits.slice(0, 3).join('", "')}"` : "",
+    emojiHeads >= 3 ? `${emojiHeads} emoji headings` : "",
+  ].filter(Boolean).join(", ");
+  add("aislop", "No AI-slop tells", 10 - slopPenalty, 10,
+    `Remove the AI tells: ${tells}.`,
+    `${tells}. Your README reads like a chatbot wrote it, because one probably did.`);
