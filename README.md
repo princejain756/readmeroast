@@ -31,5 +31,16 @@ landing on a repo cold. Weights are scaled to a score out of 100:
 | Install instructions | 15 |
 | Usage example | 15 |
 | Screenshot or demo | 10 |
+| No AI-slop tells | 10 |
+| Code blocks have language tags | 8 |
 | License mentioned | 8 |
 | Length (not a tweet, not a novel) | 6 |
+| No stale promises | 4 |
+
+The AI-slop check counts em dashes, chatbot vocabulary, and emoji-spam
+headings. A README can pass everything else and still read like a language
+model wrote it.
+
+## License
+
+MIT
