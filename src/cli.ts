@@ -62,3 +62,15 @@ function main() {
   const args = process.argv.slice(2);
   const flag = (f: string) => args.includes(f);
   if (flag("--help") || flag("-h")) return console.log(HELP);
+
+  const tone = flag("--savage") ? "savage" : flag("--gentle") ? "gentle" : "spicy";
+  const { file, label } = resolveTarget(args.find((a) => !a.startsWith("-")) ?? ".");
+  print(scoreReadme(readFileSync(file, "utf8")), label, tone);
+}
+
+try {
+  main();
+} catch (e) {
+  console.error((e as Error).message);
+  process.exit(1);
+}
