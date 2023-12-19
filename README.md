@@ -17,8 +17,7 @@ node dist/cli.js .
 ```
 
 Point it at a file or a directory holding a README. It prints a score out
-of 100 and the components that made it up, worst offenders first as
-one-line notes.
+of 100 and the components that made it up, worst offenders first as one-line notes.
 
 ## Checks
 
@@ -40,6 +39,11 @@ landing on a repo cold. Weights are scaled to a score out of 100:
 The AI-slop check counts em dashes, chatbot vocabulary, and emoji-spam
 headings. A README can pass everything else and still read like a language
 model wrote it.
+
+## Tone
+
+Default output is spicy. `--gentle` swaps the roasts for constructive
+fixes, `--savage` turns the volume up.
 
 ## License
 
