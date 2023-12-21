@@ -8,28 +8,60 @@ const HELP = `readmeroast - score a README out of 100 and get roasted for what's
 Usage:
   readmeroast                 Roast ./README.md
   readmeroast <path>          Roast a local README or directory
+  readmeroast <owner/repo>    Roast a GitHub repo's README
+  readmeroast <github-url>    Same, pasted
 
 Flags:
   --gentle   Constructive notes only (default is spicy)
-  --savage   Maximum disrespect`;
+  --savage   Maximum disrespect
+
+Env:
+  GITHUB_TOKEN or GH_TOKEN   Raises GitHub API rate limits`;
 
 const README_NAMES = ["README.md", "readme.md", "Readme.md", "README.MD", "README.markdown", "README.txt", "README"];
 
-interface Target {
-  file: string;
+interface Loaded {
+  md: string;
   label: string;
 }
 
-// Accept a README path, a directory holding one, or nothing at all for the cwd.
-function resolveTarget(path: string): Target {
+function loadLocal(path: string): Loaded {
   const p = resolve(path);
   if (!existsSync(p)) throw new Error(`no such file or directory: ${path}`);
-  if (!statSync(p).isDirectory()) {
-    return { file: p, label: p.replace(process.cwd() + "/", "") };
+  let file = p;
+  if (statSync(p).isDirectory()) {
+    const found = README_NAMES.map((n) => join(p, n)).find(existsSync);
+    if (!found) throw new Error(`no README found in ${path}`);
+    file = found;
   }
-  const found = README_NAMES.map((n) => join(p, n)).find(existsSync);
-  if (!found) throw new Error(`no README found in ${path}`);
-  return { file: found, label: found.replace(process.cwd() + "/", "") };
+  return {
+    md: readFileSync(file, "utf8"),
+    label: file.replace(process.cwd() + "/", ""),
+  };
+}
+
+async function ghFetch(path: string): Promise<any> {
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  const res = await fetch(`https://api.github.com${path}`, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      "User-Agent": "readmeroast",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  if (res.status === 404) throw new Error("repo not found (or it's private; set GITHUB_TOKEN)");
+  if (res.status === 403) throw new Error(`GitHub rate limit hit. Set GITHUB_TOKEN for more.`);
+  if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+  return res.json();
+}
+
+async function loadGitHub(owner: string, repo: string): Promise<Loaded> {
+  await ghFetch(`/repos/${owner}/${repo}`);
+  const readme = await ghFetch(`/repos/${owner}/${repo}/readme`);
+  return {
+    md: Buffer.from(readme.content, "base64").toString("utf8"),
+    label: `github.com/${owner}/${repo}`,
+  };
 }
 
 function savageVerdict(score: number): string {
@@ -56,21 +88,3 @@ function print(result: ScoreResult, label: string, tone: string) {
     for (const f of result.findings) console.log(`- ${f[key]}`);
     if (result.score < 100) console.log(`\nFix all of it and you're at 100/100.`);
   }
-}
-
-function main() {
-  const args = process.argv.slice(2);
-  const flag = (f: string) => args.includes(f);
-  if (flag("--help") || flag("-h")) return console.log(HELP);
-
-  const tone = flag("--savage") ? "savage" : flag("--gentle") ? "gentle" : "spicy";
-  const { file, label } = resolveTarget(args.find((a) => !a.startsWith("-")) ?? ".");
-  print(scoreReadme(readFileSync(file, "utf8")), label, tone);
-}
-
-try {
-  main();
-} catch (e) {
-  console.error((e as Error).message);
-  process.exit(1);
-}
