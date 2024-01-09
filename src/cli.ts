@@ -88,3 +88,12 @@ function print(result: ScoreResult, label: string, tone: string) {
     for (const f of result.findings) console.log(`- ${f[key]}`);
     if (result.score < 100) console.log(`\nFix all of it and you're at 100/100.`);
   }
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  const flag = (f: string) => args.includes(f);
+  if (flag("--help") || flag("-h")) return console.log(HELP);
+
+  const tone = flag("--savage") ? "savage" : flag("--gentle") ? "gentle" : "spicy";
+  const target = args.find((a) => !a.startsWith("-"));
