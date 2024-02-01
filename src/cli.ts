@@ -111,3 +111,11 @@ async function main() {
     }
     loaded = await loadGitHub(m[1], m[2]);
   }
+
+  print(scoreReadme(loaded.md), loaded.label, tone);
+}
+
+main().catch((e) => {
+  console.error(e.message || e);
+  process.exit(1);
+});
