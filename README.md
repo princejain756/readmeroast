@@ -14,10 +14,15 @@ npm run build
 ```bash
 node dist/cli.js path/to/README.md
 node dist/cli.js .
+node dist/cli.js owner/repo
 ```
 
-Point it at a file or a directory holding a README. It prints a score out
-of 100 and the components that made it up, worst offenders first as one-line notes.
+Point it at a file, a directory holding a README, or an `owner/repo` slug
+to fetch the README from GitHub. It prints a score out of 100 and the
+components that made it up, worst offenders first as one-line notes.
+
+`GITHUB_TOKEN` (or `GH_TOKEN`) raises GitHub API rate limits. Without it
+you get about 60 requests per hour.
 
 ## Checks
 
