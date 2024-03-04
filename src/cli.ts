@@ -134,3 +134,17 @@ async function main() {
 
   const tone = flag("--savage") ? "savage" : flag("--gentle") ? "gentle" : "spicy";
   const target = args.find((a) => !a.startsWith("-"));
+
+  let loaded: Loaded;
+  if (!target) {
+    loaded = loadLocal(".");
+  } else if (existsSync(target)) {
+    loaded = loadLocal(target);
+  } else {
+    const m = target.match(/(?:github\.com\/)?([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)(?:\.git|\/.*)?$/);
+    if (!m) {
+      console.error(`Can't figure out what '${target}' is. Try a path or owner/repo.`);
+      process.exit(1);
+    }
+    loaded = await loadGitHub(m[1], m[2]);
+  }
