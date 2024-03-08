@@ -148,3 +148,12 @@ async function main() {
     }
     loaded = await loadGitHub(m[1], m[2]);
   }
+
+  const result = scoreReadme(loaded.md, { fileExists: loaded.fileExists });
+  print(result, loaded.label, tone, loaded.skipped);
+}
+
+main().catch((e) => {
+  console.error(e.message || e);
+  process.exit(1);
+});
