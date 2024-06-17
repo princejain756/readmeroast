@@ -18,6 +18,10 @@ export interface ScoreResult {
   findings: Finding[];
 }
 
+export interface ScoreOptions {
+  fileExists?: (href: string) => boolean;
+}
+
 const SLOP_WORDS = [
   "delve", "seamless", "leverage", "elevate", "passionate",
   "cutting-edge", "cutting edge", "game-chang", "unlock",
@@ -71,6 +75,18 @@ function firstParagraphOffset(md: string): number {
   return -1;
 }
 
+function relativeLinks(md: string): string[] {
+  const links: string[] = [];
+  const re = /!?\[[^\]]*\]\(([^)\s"'<]+)[^)]*\)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(md))) {
+    const href = m[1];
+    if (/^(https?:|mailto:|#)/i.test(href)) continue;
+    links.push(href.split("#")[0]);
+  }
+  return links.filter((l) => l.length > 0);
+}
+
 function countEmojiHeadings(md: string): number {
   return md
     .split("\n")
@@ -86,7 +102,7 @@ function verdictFor(score: number): string {
   return "Brutal. This README scares people off.";
 }
 
-export function scoreReadme(md: string): ScoreResult {
+export function scoreReadme(md: string, opts: ScoreOptions = {}): ScoreResult {
   md = stripComments(md);
   const checks: CheckResult[] = [];
   const findings: Finding[] = [];
@@ -180,7 +196,24 @@ export function scoreReadme(md: string): ScoreResult {
     `${words} words. Nobody reads this. Split it into docs and keep the front door clean.`);
   else add("length", "Length (tweet vs novel)", 6, 6);
 
-  // 8. AI-slop tells (10)
+  // 8. Broken relative links (9)
+  if (opts.fileExists) {
+    const rel = relativeLinks(md);
+    const broken = [...new Set(rel.filter((l) => !opts.fileExists!(l)))];
+    if (!broken.length) {
+      add("links", "Links resolve", 9, 9);
+    } else {
+      const pts = Math.max(0, 9 - broken.length * 3);
+      const shown = broken.slice(0, 3).join(", ") + (broken.length > 3 ? ` (+${broken.length - 3} more)` : "");
+      add("links", "Links resolve", pts, 9,
+        `Fix or remove dead links: ${shown}`,
+        `${broken.length} dead link${broken.length === 1 ? "" : "s"} (${shown}). Clicking a 404 in your README is how trust dies.`);
+    }
+  } else {
+    add("links", "Links resolve", 9, 9);
+  }
+
+  // 9. AI-slop tells (10)
   const emDashes = (prose.match(/—/g) || []).length + (prose.match(/ -- /g) || []).length;
   const lower = prose.toLowerCase();
   const slopHits = SLOP_WORDS.filter((w) => lower.includes(w));
@@ -198,17 +231,3 @@ export function scoreReadme(md: string): ScoreResult {
   add("aislop", "No AI-slop tells", 10 - slopPenalty, 10,
     `Remove the AI tells: ${tells}.`,
     `${tells}. Your README reads like a chatbot wrote it, because one probably did.`);
-
-  // 9. Stale promises (4)
-  const wipHits = (prose.match(/\b(todo|fixme|coming soon|work in progress|wip)\b|🚧/gi) || []).length;
-  if (!wipHits) {
-    add("wip", "No stale promises", 4, 4);
-  } else {
-    add("wip", "No stale promises", Math.max(0, 4 - wipHits * 2), 4,
-      `${wipHits} TODO/coming-soon markers. Ship it or cut the promise.`,
-      `"Coming soon" in a README is a museum exhibit. Either build it or delete the line.`);
-  }
-
-  const score = checks.reduce((a, c) => a + c.points, 0);
-  return { score, verdict: verdictFor(score), checks, findings };
-}
