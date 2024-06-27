@@ -231,3 +231,17 @@ export function scoreReadme(md: string, opts: ScoreOptions = {}): ScoreResult {
   add("aislop", "No AI-slop tells", 10 - slopPenalty, 10,
     `Remove the AI tells: ${tells}.`,
     `${tells}. Your README reads like a chatbot wrote it, because one probably did.`);
+
+  // 10. Stale promises (4)
+  const wipHits = (prose.match(/\b(todo|fixme|coming soon|work in progress|wip)\b|🚧/gi) || []).length;
+  if (!wipHits) {
+    add("wip", "No stale promises", 4, 4);
+  } else {
+    add("wip", "No stale promises", Math.max(0, 4 - wipHits * 2), 4,
+      `${wipHits} TODO/coming-soon markers. Ship it or cut the promise.`,
+      `"Coming soon" in a README is a museum exhibit. Either build it or delete the line.`);
+  }
+
+  const score = checks.reduce((a, c) => a + c.points, 0);
+  return { score, verdict: verdictFor(score), checks, findings };
+}
