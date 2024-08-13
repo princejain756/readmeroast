@@ -1,16 +1,31 @@
 {
   "name": "readmeroast",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "Score any GitHub README out of 100 and get roasted for what it's missing",
   "type": "module",
+  "main": "dist/cli.js",
+  "bin": {
+    "readmeroast": "./dist/cli.js"
+  },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepare": "tsc"
   },
   "engines": {
     "node": ">=18"
   },
+  "keywords": [
+    "readme",
+    "markdown",
+    "github",
+    "linter",
+    "roast",
+    "documentation",
+    "score",
+    "cli"
+  ],
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^26.6.5",
     "typescript": "^7.0.2"
   }
-}
