@@ -14,6 +14,9 @@ Usage:
 Flags:
   --gentle   Constructive notes only (default is spicy)
   --savage   Maximum disrespect
+  --badge    Print a shields.io badge with your score
+  --min N    Exit 1 if the score is below N (for CI)
+  --json     Machine-readable output
 
 Env:
   GITHUB_TOKEN or GH_TOKEN   Raises GitHub API rate limits`;
@@ -108,6 +111,11 @@ function savageVerdict(score: number): string {
   return "Blank would be an improvement.";
 }
 
+function badgeUrl(score: number): string {
+  const color = score >= 90 ? "brightgreen" : score >= 75 ? "green" : score >= 50 ? "yellow" : score >= 25 ? "orange" : "red";
+  return `https://img.shields.io/badge/readme_score-${score}%2F100-${color}`;
+}
+
 function print(result: ScoreResult, label: string, tone: string, skipped?: string) {
   const w = Math.max(...result.checks.map((c) => c.label.length));
   console.log(`readmeroast - ${label}\n`);
@@ -133,7 +141,9 @@ async function main() {
   if (flag("--help") || flag("-h")) return console.log(HELP);
 
   const tone = flag("--savage") ? "savage" : flag("--gentle") ? "gentle" : "spicy";
-  const target = args.find((a) => !a.startsWith("-"));
+  const minIdx = args.indexOf("--min");
+  const min = minIdx >= 0 ? Number(args[minIdx + 1]) : null;
+  const target = args.find((a, i) => !a.startsWith("-") && (minIdx < 0 || i !== minIdx + 1));
 
   let loaded: Loaded;
   if (!target) {
@@ -142,7 +152,7 @@ async function main() {
     loaded = loadLocal(target);
   } else {
     const m = target.match(/(?:github\.com\/)?([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)(?:\.git|\/.*)?$/);
-    if (!m) {
+    if (!m || (!target.includes("/") && !existsSync(target))) {
       console.error(`Can't figure out what '${target}' is. Try a path or owner/repo.`);
       process.exit(1);
     }
@@ -150,10 +160,12 @@ async function main() {
   }
 
   const result = scoreReadme(loaded.md, { fileExists: loaded.fileExists });
-  print(result, loaded.label, tone, loaded.skipped);
-}
 
-main().catch((e) => {
-  console.error(e.message || e);
-  process.exit(1);
-});
+  if (flag("--json")) {
+    console.log(JSON.stringify({ target: loaded.label, ...result }, null, 2));
+  } else {
+    print(result, loaded.label, tone, loaded.skipped);
+    if (flag("--badge")) {
+      console.log(`\nBadge for your README:\n[![README score](${badgeUrl(result.score)})](https://github.com/princejain756/readmeroast)`);
+    }
+  }
