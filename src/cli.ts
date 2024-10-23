@@ -169,3 +169,11 @@ async function main() {
       console.log(`\nBadge for your README:\n[![README score](${badgeUrl(result.score)})](https://github.com/princejain756/readmeroast)`);
     }
   }
+
+  if (min !== null && result.score < min) process.exit(1);
+}
+
+main().catch((e) => {
+  console.error(e.message || e);
+  process.exit(1);
+});
