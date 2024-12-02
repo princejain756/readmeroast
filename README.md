@@ -1,35 +1,39 @@
 # readmeroast
 
-Score a README out of 100 and get roasted for what it's missing.
-
-## Install
+**Score any GitHub README out of 100, and get roasted for what it's missing.**
 
 ```bash
-npm install
-npm run build
+npx readmeroast you/yourrepo
 ```
 
-## Usage
+````console
+PITCH IN THE FIRST LINES         15/15
+INSTALL INSTRUCTIONS             15/15
+USAGE EXAMPLE                     9/15
+CODE BLOCKS HAVE LANGUAGE TAGS    5/8
+SCREENSHOT OR DEMO               10/10
+LICENSE MENTIONED                 0/8
+LENGTH (TWEET VS NOVEL)           6/6
+LINKS RESOLVE                     9/9
+NO AI-SLOP TELLS                 10/10
+NO STALE PROMISES                 4/4
 
-```bash
-node dist/cli.js path/to/README.md
-node dist/cli.js .
-node dist/cli.js owner/repo
-```
+Score: 83/100 - Solid. A few fixes from great.
 
-Point it at a file, a directory holding a README, or an `owner/repo` slug
-to fetch the README from GitHub. It prints a score out of 100 and the
-components that made it up, worst offenders first as one-line notes.
+- You've got half a usage story. Show the thing working.
+- Bare ``` blocks mean gray walls of text. One word after the fence fixes it.
+- No license means nobody can legally use your code. That's a feature you forgot.
 
-`GITHUB_TOKEN` (or `GH_TOKEN`) raises GitHub API rate limits. Without it
-you get about 60 requests per hour, and a roast costs three.
+Fix all of it and you're at 100/100.
+````
 
-## Checks
+Real output, roasting [mcp-tax](https://github.com/princejain756/mcp-tax).
 
-Each check carries a weight, set by how much the thing matters to someone
-landing on a repo cold. Weights are scaled to a score out of 100:
+## What it checks
 
-| Check | Weight |
+Ten checks, weighted to 100:
+
+| Check | Points |
 |-------|-------:|
 | Pitch in the first lines | 15 |
 | Install instructions | 15 |
@@ -46,16 +50,24 @@ The AI-slop check counts em dashes, chatbot vocabulary, and emoji-spam
 headings. A README can pass everything else and still read like a language
 model wrote it.
 
-The links check resolves every relative link and image against disk, or
-against the repo's file tree when the target is remote. Dead links in a
-README are how trust dies. If the tree can't be fetched the check is
-marked skipped rather than guessed at.
+The links check fetches the repo's file tree and verifies every relative
+link and image actually resolves. Dead links in a README are how trust
+dies.
 
-## Tone
+## Install
 
-Default output is spicy. `--gentle` swaps the roasts for constructive
-fixes, `--savage` turns the volume up.
+```bash
+npx readmeroast owner/repo   # run once, no install
+npm i -g readmeroast         # or keep it around
+```
 
-## License
+Requires Node 18+.
 
-MIT
+## Usage
+
+```text
+readmeroast                  # roast ./README.md
+readmeroast ./docs           # roast a directory's README
+readmeroast owner/repo       # roast a GitHub repo
+readmeroast owner/repo --savage
+```
