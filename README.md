@@ -71,3 +71,14 @@ readmeroast ./docs           # roast a directory's README
 readmeroast owner/repo       # roast a GitHub repo
 readmeroast owner/repo --savage
 ```
+
+```text
+--gentle   constructive notes only (default tone is spicy)
+--savage   maximum disrespect
+--badge    print a shields.io badge with your score
+--min N    exit 1 if the score is below N (useful as a CI gate)
+--json     machine-readable output
+```
+
+`GITHUB_TOKEN` (or `GH_TOKEN`) raises GitHub API rate limits. Without it
+you get about 60 requests per hour, and a roast costs three.
