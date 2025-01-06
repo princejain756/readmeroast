@@ -82,3 +82,14 @@ readmeroast owner/repo --savage
 
 `GITHUB_TOKEN` (or `GH_TOKEN`) raises GitHub API rate limits. Without it
 you get about 60 requests per hour, and a roast costs three.
+
+## Badge
+
+```bash
+readmeroast you/repo --badge
+```
+
+prints a shields badge with your score, ready to paste into the README it
+just judged. Show it off, or wear the shame.
+
+## Notes
