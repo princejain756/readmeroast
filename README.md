@@ -93,3 +93,14 @@ prints a shields badge with your score, ready to paste into the README it
 just judged. Show it off, or wear the shame.
 
 ## Notes
+
+- It's a heuristic. It checks the conventions people actually scan for;
+  it can't tell whether your docs are true or well written.
+- Awesome-style lists and curated-link repos score low on install and
+  usage by design. They aren't software landing pages. Take the score
+  with the salt it deserves.
+- The link check needs the GitHub trees API. If it can't be fetched, that
+  check is skipped and marked as such.
+- Nothing leaves your machine except GitHub API calls for remote repos.
+
+## Why
