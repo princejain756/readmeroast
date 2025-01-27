@@ -104,3 +104,14 @@ just judged. Show it off, or wear the shame.
 - Nothing leaves your machine except GitHub API calls for remote repos.
 
 ## Why
+
+A README is a landing page. Most repos lose visitors in the first screen:
+no pitch, no install command, no example. This prints the bill on one
+screen, plus a roast so it stings enough to fix.
+
+PRs welcome: more checks, better markdown parsing, a `--fix` mode that
+rewrites instead of complaining.
+
+## License
+
+MIT
