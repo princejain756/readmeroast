@@ -92,6 +92,20 @@ readmeroast you/repo --badge
 prints a shields badge with your score, ready to paste into the README it
 just judged. Show it off, or wear the shame.
 
+## Famous scores
+
+From [LEADERBOARD.md](LEADERBOARD.md):
+
+| Score | Repo |
+|------:|------|
+| 88 | vuejs/core |
+| 85 | facebook/react |
+| 61 | microsoft/vscode |
+| 52 | torvalds/linux |
+| 47 | sindresorhus/awesome |
+
+Stars don't guarantee the front door is clean.
+
 ## Notes
 
 - It's a heuristic. It checks the conventions people actually scan for;
@@ -108,10 +122,3 @@ just judged. Show it off, or wear the shame.
 A README is a landing page. Most repos lose visitors in the first screen:
 no pitch, no install command, no example. This prints the bill on one
 screen, plus a roast so it stings enough to fix.
-
-PRs welcome: more checks, better markdown parsing, a `--fix` mode that
-rewrites instead of complaining.
-
-## License
-
-MIT
