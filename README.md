@@ -1,5 +1,8 @@
 # readmeroast
 
+[![ci](https://github.com/princejain756/readmeroast/actions/workflows/ci.yml/badge.svg)](https://github.com/princejain756/readmeroast/actions/workflows/ci.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 **Score any GitHub README out of 100, and get roasted for what it's missing.**
 
 ```bash
