@@ -1,6 +1,6 @@
 {
   "name": "readmeroast",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "Score any GitHub README out of 100 and get roasted for what it's missing",
   "type": "module",
   "main": "dist/cli.js",
