@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; background: #0b0e14; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: "SF Mono", Menlo, monospace; }
+  .term { width: 980px; margin: 40px; border-radius: 12px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.6); background: #0d1117; border: 1px solid #21262d; }
+  .bar { display: flex; gap: 8px; padding: 14px 16px; background: #161b22; border-bottom: 1px solid #21262d; align-items: center; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .r { background: #ff5f57; } .y { background: #febc2e; } .g { background: #28c840; }
+  .title { margin-left: 12px; color: #7d8590; font-size: 13px; }
+  pre { margin: 0; padding: 28px 32px 34px; font-size: 17px; line-height: 1.62; color: #c9d1d9; }
+  .p { color: #79c0ff; } .dim { color: #7d8590; }
+  .score { color: #e3b341; font-weight: 700; }
+  .find { color: #ffa198; }
+</style>
+</head>
+<body>
+<div class="term">
+  <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="title">zsh</span></div>
+<pre><span class="p">$</span> npx readmeroast microsoft/vscode
+
+<span class="dim">readmeroast - github.com/microsoft/vscode</span>
+
+PITCH IN THE FIRST LINES          6/15
+INSTALL INSTRUCTIONS              0/15
+USAGE EXAMPLE                     0/15
+CODE BLOCKS HAVE LANGUAGE TAGS    8/8
+SCREENSHOT OR DEMO               10/10
+LICENSE MENTIONED                 8/8
+LENGTH (TWEET VS NOVEL)           6/6
+LINKS RESOLVE                     9/9
+NO AI-SLOP TELLS                 10/10
+NO STALE PROMISES                 4/4
+
+<span class="score">Score: 61/100 - Bounce risk. People are leaving.</span>
+
+<span class="find">- Your pitch is buried. Visitors decide in 5 seconds,
+  and you're spending them on badges.
+- No install instructions. How do you expect anyone to
+  use this, osmosis?
+- No usage example. Visitors shouldn't have to read
+  source to figure out step one.</span>
+
+<span class="dim">Fix all of it and you're at 100/100.</span>
+
+<span class="p">$</span> <span class="dim">|</span></pre>
+</div>
+</body>
+</html>
