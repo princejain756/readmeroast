@@ -2,6 +2,8 @@
 
 **Score any GitHub README out of 100, and get roasted for what it's missing.**
 
+![readmeroast roasting microsoft/vscode: 61/100](demo.png)
+
 ```bash
 npx readmeroast you/yourrepo
 ```
