@@ -1,8 +1,12 @@
 # readmeroast
 
+[![npm](https://img.shields.io/npm/v/readmeroast)](https://www.npmjs.com/package/readmeroast)
+[![ci](https://github.com/princejain756/readmeroast/actions/workflows/ci.yml/badge.svg)](https://github.com/princejain756/readmeroast/actions/workflows/ci.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 **Score any GitHub README out of 100, and get roasted for what it's missing.**
 
-![readmeroast roasting microsoft/vscode: 61/100](demo.png)
+![readmeroast roasting a README in the terminal](demo.gif)
 
 ```bash
 npx readmeroast you/yourrepo
